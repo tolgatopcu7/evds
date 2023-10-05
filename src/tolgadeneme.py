@@ -155,7 +155,6 @@ class Page2(tk.Frame):
 
         button1.pack(pady=5)
         button2.pack(pady=5)
-        a = 5
 
 if __name__ == "__main__":
     app = MainApplication()
