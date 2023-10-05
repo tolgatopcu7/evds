@@ -10,12 +10,16 @@ LABEL_FONT = ('Courier', 10)
 BUTTON_FONT = ('Courier', 10)
 evds = evdsAPI('ZGhjBH73U6')
 
+button1_pos = 0.625
+button2_pos = 0.750
+
 class MainApplication(tk.Tk):
 
     # __init__ function for class tkinterApp
     def __init__(self, *args, **kwargs):
         # __init__ function for class Tk
         tk.Tk.__init__(self, *args, **kwargs)
+        self.resizable(0,0)
         self.title("TolgaTopcu")
         self.iconphoto(False, tk.PhotoImage(file="lock.png"))
         self.title_font = tkfont.Font(family='Verdana', size=20,
@@ -67,18 +71,21 @@ class StartPage(tk.Frame):
 
         year_label = tk.Label(self, fg="white", bg=APP_COLOR, text="Yılı seçiniz:")
         year_label.pack()
+
         self.year_combobox = ttk.Combobox(self, values=[str(i) for i in range(2019, 2024)])
         self.year_combobox.set(datetime.today().strftime('20%y'))
         self.year_combobox.pack()
+        self.year_combobox.bind('<<ComboboxSelected>>', self.get_updated_data)
 
         month_label = tk.Label(self,fg="white", bg=APP_COLOR, text="Ayı seçiniz:" )
         month_label.pack()
-        self.month_combobox = ttk.Combobox(self, values=[str(i) for i in range(1, 13)])
-        self.month_combobox.set(datetime.today().strftime('%m'))
+
+        self.month_combobox = ttk.Combobox(self)
+        # self.month_combobox.set(datetime.today().strftime('%m'))
+        self.month_combobox.set('Önce Yılı Seçiniz')
         self.month_combobox.pack()
 
         calculate_button = tk.Button(self, text="Hesapla", command=self.calculate_average_dollar)
-        # calculate_button = tk.Button(self, text="Hesapla")
         calculate_button.pack(pady=10)
 
         self.result_label = tk.Label(self, text="",bg=APP_COLOR)
@@ -91,8 +98,12 @@ class StartPage(tk.Frame):
                             command=lambda: controller.show_frame(Page2),
                             font=BUTTON_FONT)
 
-        button2.pack(side=tk.BOTTOM, pady=5)
-        button1.pack(side=tk.BOTTOM, pady=0)
+        # button2.pack(side=tk.BOTTOM, pady=5)
+        # button1.pack(side=tk.BOTTOM, pady=0)
+        # button1.pack(side=tk.TOP,)
+        button1.place(relx=0.5, rely=button1_pos, anchor=tk.CENTER)
+        button2.place(relx=0.5, rely=button2_pos, anchor=tk.CENTER)
+
 
     def get_monthly_average_dollar(self, year, month):
         series_code = "TP.DK.USD.S.EF.YTL"
@@ -105,12 +116,23 @@ class StartPage(tk.Frame):
 
     # Kullanıcıdan ay ve yıl seçimini alacak olan işlev
     def calculate_average_dollar(self):
-        selected_month = int(self.month_combobox.get())
+        if self.month_combobox.get().isnumeric():
+            selected_month = int(self.month_combobox.get())
+        else:
+            selected_month = datetime.today().strftime('%m')
+
+        # selected_month = int(self.month_combobox.get())
         selected_year = int(self.year_combobox.get())
         result = self.get_monthly_average_dollar(selected_year, selected_month)
         # Sonucu ekranda gösterme
         self.result_label.config(bg="white", text=f"Aylık Ortalama Dolar Kuru: {result:.4f}")
 
+    # Yıl seçimine göre ay listesini güncellemek için
+    def get_updated_data(self, *args):
+        if (self.year_combobox.get()) == '2023':
+            self.month_combobox.config(values=[str(i) for i in range(1, (int(datetime.today().strftime('%m'))+1))])
+        else:
+            self.month_combobox.config(values=[str(i) for i in range(1, 13)])
 
 # second window frame page1
 class Page1(tk.Frame):
@@ -131,8 +153,8 @@ class Page1(tk.Frame):
                             command=lambda: controller.show_frame(StartPage),
                             font=BUTTON_FONT)
 
-        button1.pack(pady=5)
-        button2.pack(pady=5)
+        button1.place(relx=0.5, rely=button1_pos, anchor=tk.CENTER)
+        button2.place(relx=0.5, rely=button2_pos, anchor=tk.CENTER)
 
 
 # third window frame page2
@@ -153,8 +175,8 @@ class Page2(tk.Frame):
                             command=lambda: controller.show_frame(StartPage),
                             font=BUTTON_FONT)
 
-        button1.pack(pady=5)
-        button2.pack(pady=5)
+        button1.place(relx=0.5, rely=button1_pos, anchor=tk.CENTER)
+        button2.place(relx=0.5, rely=button2_pos, anchor=tk.CENTER)
 
 if __name__ == "__main__":
     app = MainApplication()
